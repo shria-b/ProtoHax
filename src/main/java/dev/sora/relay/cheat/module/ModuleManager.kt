@@ -25,6 +25,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleSurround())
 		registerModule(ModuleCrystalAura())
 		registerModule(ModuleHitbox())
+		registerModule(ModuleCriticals())
 
 		//misc
 		registerModule(ModuleSpammer())
