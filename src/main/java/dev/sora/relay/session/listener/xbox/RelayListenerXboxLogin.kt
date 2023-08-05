@@ -1,6 +1,7 @@
 package dev.sora.relay.session.listener.xbox
 
 import coelho.msftauth.api.xbox.*
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import dev.sora.relay.cheat.config.AbstractConfigManager
@@ -36,7 +37,7 @@ class RelayListenerXboxLogin(val accessToken: () -> String, val deviceInfo: Xbox
             if (field.notAfter < System.currentTimeMillis() / 1000) {
                 field = tokenCache?.checkCache(deviceInfo)?.also {
                     logInfo("token cache hit")
-                } ?: fetchIdentityToken(accessToken(), deviceInfo).also {
+                } ?: fetchXboxCredentials(accessToken(), deviceInfo).fetchIdentityToken().also {
                     tokenCache?.let { cache ->
                         logInfo("saving token cache")
                         cache.cache(deviceInfo, it)
@@ -48,10 +49,6 @@ class RelayListenerXboxLogin(val accessToken: () -> String, val deviceInfo: Xbox
         }
     private val chain: List<String>
         get() = fetchChain(identityToken.token, keyPair)
-
-    fun forceFetchChain() {
-        chain
-    }
 
     override fun onPacketOutbound(packet: BedrockPacket): Boolean {
         if (packet is LoginPacket) {
@@ -76,11 +73,14 @@ class RelayListenerXboxLogin(val accessToken: () -> String, val deviceInfo: Xbox
     companion object {
 
 		/**
-		 * this key used to sign the post content
+		 * this key used to sign the http POST body
 		 */
 		val deviceKey = XboxDeviceKey()
 
-        fun fetchIdentityToken(accessToken: String, deviceInfo: XboxDeviceInfo): XboxIdentityToken {
+		const val MC_VERSION = "1.20.12"
+		const val MC_PLAYFAB_TITLE_ID = "20CA2"
+
+        fun fetchXboxCredentials(accessToken: String, deviceInfo: XboxDeviceInfo): XboxCredentials {
             var userToken: XboxToken? = null
             val userRequestThread = thread {
                 userToken = XboxUserAuthRequest(
@@ -118,19 +118,14 @@ class RelayListenerXboxLogin(val accessToken: () -> String, val deviceInfo: Xbox
 				}
                 sisuToken.titleToken
             }
-            if (userRequestThread.isAlive)
-                userRequestThread.join()
-            if (userToken == null) error("failed to fetch xbox user token")
-            val xstsToken = XboxXSTSAuthRequest(
-                "https://multiplayer.minecraft.net/",
-                "JWT",
-                "RETAIL",
-                listOf(userToken),
-                titleToken,
-                XboxDevice(deviceKey, deviceToken)
-            ).request(HttpUtils.client)
 
-            return XboxIdentityToken(xstsToken.toIdentityToken(), Instant.parse(xstsToken.notAfter).epochSecond)
+			if (userRequestThread.isAlive)
+                userRequestThread.join()
+
+			return XboxCredentials(
+				userToken ?: error("failed to fetch xbox user token"),
+				titleToken, XboxDevice(deviceKey, deviceToken)
+			)
         }
 
         fun fetchRawChain(identityToken: String, publicKey: PublicKey): Reader {
@@ -141,18 +136,19 @@ class RelayListenerXboxLogin(val accessToken: () -> String, val deviceInfo: Xbox
 			val request = Request.Builder()
 				.url("https://multiplayer.minecraft.net/authentication")
 				.post(AbstractConfigManager.DEFAULT_GSON.toJson(data).toRequestBody("application/json".toMediaType()))
-				.header("Client-Version", "1.19.50")
+				.header("Client-Version", MC_VERSION)
 				.header("Authorization", identityToken)
 				.build()
 			val response = HttpUtils.client.newCall(request).execute()
-
-			assert(response.code == 200) { "Http code ${response.code}" }
 
 			return response.body!!.charStream()
         }
 
         fun fetchChain(identityToken: String, keyPair: KeyPair): List<String> {
             val rawChain = JsonParser.parseReader(fetchRawChain(identityToken, keyPair.public)).asJsonObject
+			if (!rawChain.has("chain")) {
+				throw IllegalStateException("No field called \"chain\" has found in response json: ${Gson().toJson(rawChain)}")
+			}
             val chains = rawChain.get("chain").asJsonArray
 
             // add the self-signed jwt
