@@ -9,7 +9,6 @@ import dev.sora.relay.game.entity.EntityLocalPlayer
 import dev.sora.relay.game.entity.EntityOther
 import dev.sora.relay.game.entity.EntityPlayer
 import dev.sora.relay.game.event.*
-import dev.sora.relay.utils.analyzeColorCoverage
 import dev.sora.relay.utils.timing.MillisecondTimer
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket
@@ -19,7 +18,7 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 	private var targetPlayersValue by boolValue("TargetPlayers", true)
 	private var targetHostileEntitiesValue by boolValue("TargetHostileEntities", false)
 	private var targetNeutralEntitiesValue by boolValue("TargetNeutralEntities", false)
-    private var antiBotModeValue by listValue("AntiBotMode", AntiBotMode.values(), AntiBotMode.NONE)
+	private var antiBotModeValue by listValue("AntiBotMode", AntiBotMode.values(), AntiBotMode.NONE)
 	private var teamCheckModeValue by listValue("TeamCheckMode", TeamCheckMode.values(), TeamCheckMode.NONE)
 
 	private var attackTimer = MillisecondTimer()
@@ -36,31 +35,48 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 	fun Entity.isTarget(): Boolean {
 		return if (this == session.player) false
 		else if (targetPlayersValue && this is EntityPlayer) !this.isBot() && !this.isTeammate()
-		else if (this is EntityOther && ((targetHostileEntitiesValue && this.isHostile) || (targetNeutralEntitiesValue && this.isNeutral))) true
-		else false
+		else this is EntityOther && ((targetHostileEntitiesValue && this.isHostile) || (targetNeutralEntitiesValue && this.isNeutral))
 	}
 
-    fun EntityPlayer.isBot(): Boolean {
-        if (this is EntityLocalPlayer) return false
+	fun EntityPlayer.isBot(): Boolean {
+		if (this is EntityLocalPlayer) return false
 
-        return when (antiBotModeValue) {
-            AntiBotMode.PLAYER_LIST -> {
-                val playerList = session.level.playerList[this.uuid] ?: return true
-                playerList.name.isBlank()
-            }
+		return when (antiBotModeValue) {
+			AntiBotMode.PLAYER_LIST -> {
+				val playerList = session.level.playerList[this.uuid] ?: return true
+				playerList.name.isBlank()
+			}
 			AntiBotMode.NONE -> false
-        }
-    }
+			AntiBotMode.NAME_TAG -> {
+				if (this.username.isBlank())
+					return true
+
+				if (session.player.displayName.isBlank() != this.displayName.isBlank())
+					return true
+
+				if (session.player.displayName.contains("\n") != this.displayName.contains("\n"))
+					return true
+
+				return false
+			}
+		}
+	}
 
 	fun EntityPlayer.isTeammate(): Boolean {
 		if (this is EntityLocalPlayer) return false
 
 		return when (teamCheckModeValue) {
 			TeamCheckMode.NAME_TAG -> {
-				val selfColor = session.player.displayName.let { analyzeColorCoverage(it).maxBy { it.value }.key }
-				val playerColor = this.displayName.let { analyzeColorCoverage(it).maxBy { it.value }.key }
+				val thePlayerNameTag = session.player.displayName
+				val targetNameTag = this.displayName
 
-				selfColor == playerColor
+				if (thePlayerNameTag.length <= 2 || targetNameTag.length <= 2)
+					return false
+
+				if (!thePlayerNameTag.contains("§") || !targetNameTag.contains("§"))
+					return false
+
+				return thePlayerNameTag.subSequence(0, 2) == targetNameTag.subSequence(0, 2)
 			}
 			TeamCheckMode.NONE -> false
 		}
@@ -97,9 +113,11 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 	class EventTargetKilled(session: GameSession, val target: Entity) : GameEvent(session, "target_killed")
 
 	private enum class AntiBotMode(override val choiceName: String) : NamedChoice {
-        PLAYER_LIST("PlayerList"),
+		PLAYER_LIST("PlayerList"),
+		NAME_TAG("NameTag"),
 		NONE("None")
-    }
+
+	}
 
 	private enum class TeamCheckMode(override val choiceName: String) : NamedChoice {
 		NAME_TAG("NameTag"),
