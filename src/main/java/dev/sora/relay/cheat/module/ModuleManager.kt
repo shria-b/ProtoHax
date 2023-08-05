@@ -57,4 +57,11 @@ class ModuleManager(private val session: GameSession) {
 	inline fun <reified T : CheatModule> getModule(t: Class<T>): T {
 		return modules.filterIsInstance<T>().first()
 	}
+
+	fun getModuleByName(name:String):CheatModule?{
+		for (module in modules) {
+			if(module.name.equals(name,true)) return module
+		}
+		return null
+	}
 }
