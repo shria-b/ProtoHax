@@ -11,23 +11,28 @@ import dev.sora.relay.game.utils.Rotation
 import dev.sora.relay.game.utils.constants.Attribute
 import dev.sora.relay.game.utils.getRotationDifference
 import dev.sora.relay.game.utils.toRotation
+import dev.sora.relay.utils.timing.MillisecondTimer
 import org.cloudburstmc.math.vector.Vector3f
 import kotlin.math.pow
 
 class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 
-    private val cpsValue = clickValue()
-    private var rangeValue by floatValue("Range", 3.7f, 2f..7f)
-	private var fovValue by intValue("FOV", 180, 30..180)
-    private var attackModeValue by listValue("AttackMode", AttackMode.values(), AttackMode.SINGLE)
-    private var rotationModeValue by listValue("RotationMode", RotationMode.values(), RotationMode.LOCK)
-    private var swingValue by listValue("Swing", EntityLocalPlayer.SwingMode.values(), EntityLocalPlayer.SwingMode.BOTH)
+	private val cpsValue = clickValue()
+	private var rangeValue by floatValue("Range", 3.7f, 2f..7f)
+	private var fovValue by intValue("Fov", 180, 30..180)
+	private var switchDelayValue by intValue("SwitchDelay", 50, 20..200)
+	private var attackModeValue by listValue("AttackMode", AttackMode.values(), AttackMode.SINGLE)
+	private var rotationModeValue by listValue("RotationMode", RotationMode.values(), RotationMode.LOCK)
+	private var swingValue by listValue("Swing", EntityLocalPlayer.SwingMode.values(), EntityLocalPlayer.SwingMode.BOTH)
 	private var priorityModeValue by listValue("PriorityMode", PriorityMode.values(), PriorityMode.DISTANCE)
 	private var reversePriorityValue by boolValue("ReversePriority", false)
 	private var mouseoverValue by boolValue("Mouseover", false)
-    private var swingSoundValue by boolValue("SwingSound", true)
-    private var failRateValue by floatValue("FailRate", 0f, 0f..1f)
-    private var failSoundValue by boolValue("FailSound", true).visible { failRateValue > 0f }
+	private var swingSoundValue by boolValue("SwingSound", true)
+	private var failRateValue by floatValue("FailRate", 0f, 0f..1f)
+	private var failSoundValue by boolValue("FailSound", true).visible { failRateValue > 0f }
+	private var switchTarget = 0
+	private val switchTimer = MillisecondTimer()
+
 
 	private val handleTick = handle<EventTick> {
 		val range = rangeValue.pow(2)
@@ -35,22 +40,37 @@ class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 		val playerRotation = Rotation(session.player.rotationYaw, session.player.rotationPitch)
 		val entityList = session.level.entityMap.values.filter {
 			it.distanceSq(session.player) < range && with(moduleTargets) { it.isTarget() } &&
-				(fovValue == 180 || getRotationDifference(playerRotation, toRotation(session.player.vec3Position, it.vec3Position)) <= fovValue)
+					(fovValue == 180 || getRotationDifference(
+						playerRotation,
+						toRotation(session.player.vec3Position, it.vec3Position)
+					) <= fovValue)
 		}
 		if (entityList.isEmpty()) return@handle
 
 		val aimTarget = selectEntity(session, entityList)
-
+		if(switchTarget >= entityList.size){
+			switchTarget = 0
+		}
 		if (cpsValue.range.first >= 20 || cpsValue.canClick) {
 			if (Math.random() <= failRateValue) {
 				session.player.swing(swingValue, failSoundValue)
 			} else {
 				when(attackModeValue) {
 					AttackMode.MULTI -> {
-						entityList.forEach { session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue) }
+						entityList.forEach {
+							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
+						}
 					}
 					AttackMode.SINGLE -> {
 						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
+					}
+					AttackMode.SWITCH -> {
+						session.player.attackEntity(entityList[switchTarget], swingValue, swingSoundValue, mouseoverValue)
+						if(switchTimer.hasTimePassed(switchDelayValue)){
+							switchTarget++
+							switchTimer.reset()
+						}
+						entityList[switchTarget]
 					}
 				}
 				cpsValue.click()
@@ -75,15 +95,16 @@ class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 	}
 
 	private enum class AttackMode(override val choiceName: String) : NamedChoice {
-        SINGLE("Single"),
-        MULTI("Multi")
-    }
+		SINGLE("Single"),
+		MULTI("Multi"),
+		SWITCH("Switch")
+	}
 
 	private enum class RotationMode(override val choiceName: String) : NamedChoice {
 		/**
 		 * blatant rotation
 		 */
-        LOCK("Lock") {
+		LOCK("Lock") {
 			override fun rotate(session: GameSession, source: Vector3f, target: Vector3f): Rotation {
 				return toRotation(source, target)
 			}
@@ -105,14 +126,14 @@ class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 				}
 			}
 		},
-        NONE("None") {
+		NONE("None") {
 			override fun rotate(session: GameSession, source: Vector3f, target: Vector3f): Rotation? {
 				return null
 			}
 		};
 
 		abstract fun rotate(session: GameSession, source: Vector3f, target: Vector3f): Rotation?
-    }
+	}
 
 	private enum class PriorityMode(override val choiceName: String) : NamedChoice {
 		DISTANCE("Distance"),
