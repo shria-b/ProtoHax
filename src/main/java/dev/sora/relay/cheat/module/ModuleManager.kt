@@ -48,6 +48,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleClip())
 		registerModule(ModuleSpeed())
 		registerModule(ModuleOpFightBot())
+		registerModule(ModuleClickTP())
 
 		//visual
 		registerModule(ModuleNoHurtCam())
