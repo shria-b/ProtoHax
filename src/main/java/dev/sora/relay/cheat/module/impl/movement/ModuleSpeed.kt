@@ -39,6 +39,17 @@ class ModuleSpeed : CheatModule("Speed", CheatCategory.MOVEMENT) {
 		sprinting = true
 	}
 
+	private val onTick = handle<EventTick>{
+		val player = session.player
+		val moduleAirJump = moduleManager.getModule(ModuleAirJump::class.java)
+		if (moduleAirJump.state && session.player.inputData.contains(PlayerAuthInputData.JUMP_DOWN)){
+			session.netSession.inboundPacket(SetEntityMotionPacket().apply {
+				runtimeEntityId = player.runtimeEntityId
+				motion = Vector3f.from(player.motionX, 0.42f, player.motionZ)
+			})
+		}
+	}
+
 	private inner class Simple : Choice("Simple") {
 
 		private val onTick = handle<EventTick> {
