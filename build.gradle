@@ -4,6 +4,10 @@ plugins {
     id 'maven-publish'
 }
 
+static def getCommitID() {
+    return 'git rev-parse --short HEAD'.execute().text.trim()
+}
+
 group = 'dev.sora.relay'
 version = '1.4.0'
 
@@ -56,7 +60,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'dev.sora.relay'
             artifactId = project.name.toLowerCase()
-            version = "${project.version.toLowerCase()}-${project.getProperty('commitHash')}"
+            version = "${project.version.toLowerCase()}-${getCommitID()}"
 
             artifact shadowJar
         }
