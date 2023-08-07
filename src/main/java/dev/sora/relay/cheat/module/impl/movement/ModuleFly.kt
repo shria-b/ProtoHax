@@ -20,8 +20,13 @@ import kotlin.math.sin
 
 class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 
-	private var modeValue by choiceValue("Mode", arrayOf(Vanilla("Vanilla"), Mineplex(), Jetpack(), Glide(), YPort()), "Vanilla")
-	private var speedValue by floatValue("Speed", 1.5f, 0.1f..5f)
+	private var modeValue by choiceValue(
+		"Mode",
+		arrayOf(Vanilla("Vanilla"), Mineplex(), Jetpack(), Glide(), YPort(), Motion(), Teleport()),
+		"Vanilla"
+	)
+	private var verticalSpeedValue by floatValue("Vertical Speed", 1.5f, 0.1f..5f)
+	private var horizontalSpeedValue by floatValue("Horizontal Speed", 1.5f, 0.1f..5f)
 	private var pressJumpValue by boolValue("PressJump", true)
 
 	private var launchY = 0f
@@ -48,7 +53,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 
 		override fun onEnable() {
 			if (session.netSessionInitialized) {
-				abilityPacket.abilityLayers[0].flySpeed = speedValue * 0.03f
+				abilityPacket.abilityLayers[0].flySpeed = horizontalSpeedValue * 0.03f
 				session.netSession.inboundPacket(abilityPacket.apply {
 					uniqueEntityId = session.player.uniqueEntityId
 				})
@@ -58,12 +63,12 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 		private val handlePacketInbound = handle<EventPacketInbound> {
 			if (packet is UpdateAbilitiesPacket) {
 				cancel()
-				abilityPacket.abilityLayers[0].flySpeed = speedValue * 0.03f
+				abilityPacket.abilityLayers[0].flySpeed = horizontalSpeedValue * 0.03f
 				session.netSession.inboundPacket(abilityPacket.apply {
 					uniqueEntityId = session.player.uniqueEntityId
 				})
 			} else if (packet is StartGamePacket) {
-				abilityPacket.abilityLayers[0].flySpeed = speedValue * 0.03f
+				abilityPacket.abilityLayers[0].flySpeed = horizontalSpeedValue * 0.03f
 				session.netSession.inboundPacket(abilityPacket.apply {
 					uniqueEntityId = session.player.uniqueEntityId
 				})
@@ -93,7 +98,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 			}
 			val player = session.player
 			val yaw = Math.toRadians(player.rotationYaw.toDouble()).toFloat()
-			val value = speedValue
+			val value = horizontalSpeedValue
 			if (motionValue) {
 				session.netSession.inboundPacket(SetEntityMotionPacket().apply {
 					runtimeEntityId = session.player.runtimeEntityId
@@ -132,9 +137,9 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 				val calcPitch: Double = (session.player.rotationPitch) * -(PI / 180)
 
 				motion = Vector3f.from(
-					cos(calcYaw) * cos(calcPitch) * speedValue,
-					sin(calcPitch) * speedValue,
-					sin(calcYaw) * cos(calcPitch) * speedValue
+					cos(calcYaw) * cos(calcPitch) * horizontalSpeedValue,
+					sin(calcPitch) * verticalSpeedValue,
+					sin(calcYaw) * cos(calcPitch) * horizontalSpeedValue
 				)
 			})
 		}
@@ -180,9 +185,54 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 
 				session.netSession.inboundPacket(SetEntityMotionPacket().apply {
 					runtimeEntityId = session.player.runtimeEntityId
-					motion = Vector3f.from(-sin(angle) * speedValue, if (flag) 0.42f else -0.42f, cos(angle) * speedValue)
+					motion =
+						Vector3f.from(-sin(angle) * horizontalSpeedValue, if (flag) 0.42f else -0.42f, cos(angle) * horizontalSpeedValue)
 				})
 				flag = !flag
+			}
+		}
+	}
+
+	private inner class Motion : Choice("Motion") {
+		private val onTick = handle<EventTick> {
+			val session = this.session
+			val player = session.player
+			val yaw = player.direction
+
+			var motionX = 0f
+			var motionY = 0f
+			var motionZ = 0f
+
+			if (session.player.inputData.contains(PlayerAuthInputData.WANT_UP)) {
+				motionY = verticalSpeedValue
+			} else if (session.player.inputData.contains(PlayerAuthInputData.WANT_DOWN)) {
+				motionY = -verticalSpeedValue
+			}
+			if (player.isHorizontallyMove()) {
+					motionX	= ((-sin(yaw) * horizontalSpeedValue).toFloat())
+					motionZ =((cos(yaw) * horizontalSpeedValue).toFloat())
+			}
+
+			session.netSession.inboundPacket(SetEntityMotionPacket().apply {
+				runtimeEntityId = session.player.runtimeEntityId
+				motion = Vector3f.from(motionX, motionY, motionZ)
+			})
+		}
+	}
+
+	private inner class Teleport : Choice("Teleport"){
+		private val handleTick = handle<EventTick> {
+			val session = this.session
+			val yaw = session.player.direction
+			if (session.player.inputData.contains(PlayerAuthInputData.WANT_UP)) {
+				launchY += verticalSpeedValue
+			} else if (session.player.inputData.contains(PlayerAuthInputData.WANT_DOWN)) {
+				launchY -= verticalSpeedValue
+			}
+			if(session.player.isHorizontallyMove()) {
+				session.player.teleport((session.player.posX - sin(yaw) * horizontalSpeedValue).toFloat(),launchY,(session.player.posZ + cos(yaw) * horizontalSpeedValue).toFloat())
+			}else{
+				session.player.teleport(session.player.posX,launchY,session.player.posZ)
 			}
 		}
 	}

@@ -90,6 +90,9 @@ class EntityLocalPlayer(private val session: GameSession, override val eventMana
 
 	private var hasSetEntityId = false
 
+	var authMotionX = 0f
+	var authMotionY = 0f
+
     override fun rotate(yaw: Float, pitch: Float) {
         this.prevRotationYaw = rotationYaw
         this.prevRotationPitch = rotationPitch
@@ -114,6 +117,29 @@ class EntityLocalPlayer(private val session: GameSession, override val eventMana
 	fun teleport(vec3: Vector3f) {
 		teleport(vec3.x, vec3.y, vec3.z)
 	}
+
+	fun isHorizontallyMove():Boolean{
+		return authMotionY != 0f || authMotionX != 0f
+	}
+
+	val direction: Double
+		get() {
+			var yaw = rotationYaw
+
+			if (authMotionY < 0f)
+				yaw += 180f
+			var forward = 1f
+			if (authMotionY < 0f)
+				forward = -0.5f
+			else if (authMotionY > 0f)
+				forward = 0.5f
+			if (authMotionX > 0f)
+				yaw -= 90f * forward
+			if (authMotionX < 0f)
+				yaw += 90f * forward
+
+			return Math.toRadians(yaw.toDouble())
+		}
 
 	override fun reset() {
 		super.reset()
@@ -215,7 +241,8 @@ class EntityLocalPlayer(private val session: GameSession, override val eventMana
 		} else if (packet is PlayerAuthInputPacket) {
 			move(packet.position)
 			rotate(packet.rotation)
-
+            authMotionX = packet.motion.x
+			authMotionY = packet.motion.y
 			moveDirectionAngle = if (packet.motion == Vector2f.ZERO) {
 				null
 			} else {
