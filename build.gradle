@@ -64,8 +64,8 @@ publishing {
             url = uri('https://maven.pkg.github.com/MoonLife-Studio/ProtoHax')
 
             credentials {
-                username = System.getenv("USERNAME_GITHUB")
-                password = System.getenv("TOKEN_GITHUB")
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }
     }
