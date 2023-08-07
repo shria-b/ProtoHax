@@ -16,7 +16,6 @@ import dev.sora.relay.session.listener.xbox.cache.XboxIdentityTokenCacheFileSyst
 import dev.sora.relay.utils.logInfo
 import dev.sora.relay.utils.logWarn
 import io.netty.util.internal.logging.InternalLoggerFactory
-import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
 import java.io.File
 import java.net.InetSocketAddress
 import java.util.*
@@ -27,11 +26,12 @@ val tokenFile = File(".ms_refresh_token")
 val tokenCacheFile = File(".token_cache.json")
 
 fun main(args: Array<String>) {
-    InternalLoggerFactory.setDefaultFactory(LoggerFactory())
-    val gameSession = craftSession()
+	InternalLoggerFactory.setDefaultFactory(LoggerFactory())
+	val gameSession = craftSession()
 
-    val dst = InetSocketAddress("127.0.0.1", 19132)
-    val sessionEncryptor = if(tokenFile.exists() && !args.contains("--offline")) {
+	val dst = InetSocketAddress("127.0.0.1", 19132)
+	var loginThread: Thread? = null
+	val sessionEncryptor = if(tokenFile.exists() && !args.contains("--offline")) {
 		val deviceInfo = XboxDeviceInfo.DEVICE_NINTENDO
 		RelayListenerXboxLogin({
 			val (accessToken, refreshToken) = deviceInfo.refreshToken(tokenFile.readText())
@@ -39,25 +39,26 @@ fun main(args: Array<String>) {
 			accessToken
 		}, deviceInfo).also {
 			it.tokenCache = XboxIdentityTokenCacheFileSystem(tokenCacheFile, "account")
-			val token = RelayListenerXboxLogin.fetchIdentityToken(it.accessToken(), deviceInfo)
-			println(token.token)
-			val mcChain = RelayListenerXboxLogin.fetchRawChain(token.token, EncryptionUtils.getMojangPublicKey())
-			println(mcChain.readText())
+			loginThread = thread {
+				it.forceFetchChain()
+				println("chain ok")
+			}
 		}
 	} else {
 		logWarn("Logged in as Offline Mode, you won't able to join xbox authenticated servers")
 		RelayListenerEncryptedSession()
 	}
-
-	return
-
-    val relay = MinecraftRelay(object : MinecraftRelayListener {
-        override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
-            session.listeners.add(RelayListenerNetworkSettings(session))
-            session.listeners.add(RelayListenerAutoCodec(session))
+	val relay = MinecraftRelay(object : MinecraftRelayListener {
+		override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
+			session.listeners.add(RelayListenerNetworkSettings(session))
+			session.listeners.add(RelayListenerAutoCodec(session))
 //			session.listeners.add(RelayListenerResourcePackDownloader(session, File("./downloaded_resource_packs")))
 			gameSession.netSession = session
-            session.listeners.add(gameSession)
+			session.listeners.add(gameSession)
+			loginThread?.also {
+				if (it.isAlive) it.join()
+				loginThread = null
+			}
 			sessionEncryptor.session = session
 			session.listeners.add(sessionEncryptor)
 //            session.listeners.add(object : MinecraftRelayPacketListener {
@@ -76,35 +77,35 @@ fun main(args: Array<String>) {
 //                }
 //            })
 
-            return dst
-        }
-    })
-    relay.bind(InetSocketAddress("0.0.0.0", 19136))
-    println("bind")
-    ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(File("./resource_packs"))
-    Thread.sleep(Long.MAX_VALUE)
+			return dst
+		}
+	})
+	relay.bind(InetSocketAddress("0.0.0.0", 19136))
+	println("bind")
+	ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(File("./resource_packs"))
+	Thread.sleep(Long.MAX_VALUE)
 }
 
 private fun craftSession() : GameSession {
-    val session = GameSession()
+	val session = GameSession()
 
-    val moduleManager = ModuleManager(session)
-    moduleManager.init()
+	val moduleManager = ModuleManager(session)
+	moduleManager.init()
 
-    val commandManager = CommandManager(session)
-    commandManager.init(moduleManager)
+	val commandManager = CommandManager(session)
+	commandManager.init(moduleManager)
 	commandManager.registerCommand(CommandDownloadWorld(session.eventManager, File("./level")))
 
-    val configManager = SingleFileConfigManager().apply {
+	val configManager = SingleFileConfigManager().apply {
 		addSection(ConfigSectionModule(moduleManager))
 	}
-    configManager.loadConfig("default")
+	configManager.loadConfig("default")
 
-    // save config automatically
-    Timer().schedule(20000L, 20000L) {
-        configManager.saveConfig("default")
-        logInfo("saving config")
-    }
+	// save config automatically
+	Timer().schedule(20000L, 20000L) {
+		configManager.saveConfig("default")
+		logInfo("saving config")
+	}
 
-    return session
+	return session
 }

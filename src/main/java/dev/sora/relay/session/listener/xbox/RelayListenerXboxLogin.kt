@@ -50,6 +50,9 @@ class RelayListenerXboxLogin(val accessToken: () -> String, val deviceInfo: Xbox
     private val chain: List<String>
         get() = fetchChain(identityToken.token, keyPair)
 
+	fun forceFetchChain() {
+		chain
+	}
     override fun onPacketOutbound(packet: BedrockPacket): Boolean {
         if (packet is LoginPacket) {
 			session.keyPair = keyPair
