@@ -14,6 +14,7 @@ repositories {
     maven { url = 'https://repo.opencollab.dev/maven-snapshots/' }
     //maven { url = 'https://mccheatz.github.io/maven_repo/' }
     maven { url = 'https://moonlife-studio.github.io/maven_repo/maven_repo' }
+    maven { url = 'https://repo.hackpixel.net/maven_repo/maven_repo/' }
 }
 
 configurations {
@@ -25,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
 
     embed('org.cloudburstmc.protocol:bedrock-connection:3.0.0.Beta1-SNAPSHOT') {
-        exclude group: 'com.nukkitx', module: 'natives'
+        exclude group: 'com.nukkitx'， module: 'natives'
     }
 
     embed 'com.google.code.gson:gson:2.10.1'
