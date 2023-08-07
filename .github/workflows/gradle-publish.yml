@@ -41,5 +41,5 @@ jobs:
       with:
         arguments: publish -PcommitHash=${{ github.sha }}
       env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.TOKEN2 }}
+        USERNAME: ${{ secrets.GITHUB_USERNAME }}
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
