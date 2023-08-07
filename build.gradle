@@ -49,8 +49,23 @@ shadowJar {
 
 publishing {
     publications {
-        shadow(MavenPublication) { publication ->
-            project.shadow.component(publication)
+        mavenJava(MavenPublication) {
+            groupId = 'dev.sora.relay'
+            artifactId = project.name.toLowerCase()
+            version = project.version.toLowerCase()
+
+            artifact shadowJar
+        }
+    }
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/MoonLife-Studio/ProtoHax')
+
+            credentials {
+                username = System.getenv("USERNAME_GITHUB")
+                password = System.getenv("TOKEN_GITHUB")
+            }
         }
     }
 }
