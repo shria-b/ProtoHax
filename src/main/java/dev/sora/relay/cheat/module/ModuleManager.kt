@@ -54,6 +54,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleNoHurtCam())
 		registerModule(ModuleAntiBlind())
 		registerModule(ModuleHitEffect())
+		registerModule(ModuleNoFireCam())
 
 	}
 
