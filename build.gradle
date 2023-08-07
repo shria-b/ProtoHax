@@ -12,9 +12,11 @@ repositories {
     mavenCentral()
     maven { url = 'https://repo.opencollab.dev/maven-releases/' }
     maven { url = 'https://repo.opencollab.dev/maven-snapshots/' }
-    //maven { url = 'https://mccheatz.github.io/maven_repo/' }
+        //maven { url = 'https://mccheatz.github.io/maven_repo/' }
     maven { url = 'https://moonlife-studio.github.io/maven_repo/maven_repo' }
     maven { url = 'https://repo.hackpixel.net/maven_repo/maven_repo/' }
+    maven { url = 'https://repo.hackpixel.net/maven_repo/' }
+    maven { url = 'https://raw.githubusercontent.com/MoonLife-Studio/maven_repo/main/maven_repo/'}
 }
 
 configurations {
