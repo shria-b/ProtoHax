@@ -15,7 +15,6 @@ import org.cloudburstmc.protocol.bedrock.packet.SetEntityDataPacket
 class ModuleAntiBlind : CheatModule("AntiBlind", CheatCategory.VISUAL) {
 
     private var nightVisionValue by boolValue("NightVision", true)
-	private var removeFireValue by boolValue("RemoveFire", false)
     private var removeBadEffectsValue by boolValue("RemoveBadEffects", true)
 	private var removeInvisibleValue by boolValue("RemoveInvisible", true)
 
@@ -47,15 +46,9 @@ class ModuleAntiBlind : CheatModule("AntiBlind", CheatCategory.VISUAL) {
 				cancel()
 			}
 		} else if (packet is SetEntityDataPacket) {
-			if (packet.runtimeEntityId == session.player.runtimeEntityId && packet.metadata?.flags != null) {
-				if (removeFireValue && packet.metadata.flags.contains(EntityFlag.ON_FIRE)) {
-					packet.metadata.setFlag(EntityFlag.ON_FIRE, false)
-				}
-			} else {
 				if (removeInvisibleValue) {
 					processInvisibleEntityData(packet.metadata)
 				}
-			}
 		} else if (removeInvisibleValue && packet is AddEntityPacket) {
 			processInvisibleEntityData(packet.metadata)
 		} else if (removeInvisibleValue && packet is AddPlayerPacket) {
