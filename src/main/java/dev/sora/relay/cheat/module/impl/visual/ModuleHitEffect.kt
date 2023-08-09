@@ -79,10 +79,6 @@ class ModuleHitEffect : CheatModule("HitEffect", CheatCategory.VISUAL) {
 		},
 		TOTEM("Totem") {
 			override fun deployEffect(session: GameSession, target: Entity) {
-				session.sendPacketToClient(LevelEventPacket().apply {
-					type = LevelEvent.SOUND_TOTEM_USED
-					position = target.vec3Position
-				})
 				session.sendPacket(LevelEventPacket().apply {
 					type = LevelEvent.SOUND_TOTEM_USED
 					position = target.vec3Position
