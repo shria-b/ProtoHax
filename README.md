@@ -1,6 +1,6 @@
 # ProtoHax
 
-<img align="right" width="159px" src="https://raw.githubusercontent.com/MoonLife-Studio/ProtoHax/stable/icon.png">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/Team-MoonMC/ProtoHax/stable/icon.png">
 
 ProtoHax is an open-source cheat for Minecraft: Bedrock Edition that works through the network layer.   
 This repository contains the abstract layer of the cheat, and is designed to be platform-agnostic.
@@ -11,7 +11,7 @@ This repository contains the abstract layer of the cheat, and is designed to be 
 3. Full control of the packet layer
 
 ## Issues
-If you notice any bugs or missing features, you can let us know by opening an issue [here](https://github.com/MoonLife-Studio/ProtoHax/issues).   
+If you notice any bugs or missing features, you can let us know by opening an issue [here](https://github.com/Team-MoonMC/ProtoHax/issues).   
 Please notice that this is an **English-only** repository, so all issues and pull requests must be in English, if you can't speak English, please use a [translator](https://translate.google.com/).
 
 ## License
@@ -31,7 +31,7 @@ For those who are unfamiliar with the license, here is a summary of its main poi
 - **Your modified application must also be licensed under the GPL** 
 
 ## Example Code
-Check out the [example](https://github.com/MoonLife-Studio/ProtoHax/tree/neko-ribbon/src/test) for sample usage.
+Check out the [example](https://github.com/Team-MoonMC/ProtoHax/tree/neko-ribbon/src/test) for sample usage.
 
 ## Platform-specific Implementations
 
@@ -39,13 +39,13 @@ To use ProtoHax on a specific platform, you will need to use the platform-specif
 
 | Platform | Repository           |
 |----------|----------------------|
-| Android  | [ProtoHax-Android](https://github.com/MoonLife-Studio/ProtoHax-Android) |
+| Android  | [ProtoHax-Android](https://github.com/Team-MoonMC/ProtoHax-Android) |
 
 ## Setting up a Workspace
 ProtoHax uses Gradle and JDK11, please make sure it is installed properly if you're facing an build failure.
 
 ### Main
-1. Clone the repository using `git clone --recurse-submodules https://github.com/MoonLife-Studio/ProtoHax.git`. 
+1. Clone the repository using `git clone --recurse-submodules https://github.com/Team-MoonMC/ProtoHax.git`. 
 2. CD into the local repository.
 3. Run `gradlew publishToMavenLocal`.
 4. Open the folder as a Gradle project in your preferred IDE.
