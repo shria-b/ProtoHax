@@ -31,9 +31,9 @@ class ModuleHitEffect : CheatModule("HitEffect", CheatCategory.VISUAL) {
 			val target = session.level.entityMap[packet.runtimeEntityId] ?: return@handle
 			if (with(moduleManager.getModule(ModuleTargets::class.java)) { target.isTarget() }) {
 				effectValue.deployEffect(session, target)
-				effectTimer.reset()
 			}
 		}
+		effectTimer.reset()
 	}
 
 	private enum class Effect(override val choiceName: String) : NamedChoice {
@@ -77,13 +77,6 @@ class ModuleHitEffect : CheatModule("HitEffect", CheatCategory.VISUAL) {
 						bodyRotation = 0f
 					})}
 		},
-		TOTEM("Totem") {
-			override fun deployEffect(session: GameSession, target: Entity) {
-				session.sendPacket(LevelEventPacket().apply {
-					type = LevelEvent.SOUND_TOTEM_USED
-					position = target.vec3Position
-				})
-			}},
 		LAVA("Lava") {
 
 			private val definition by lazy { BlockDefinition(0, "minecraft:lava", NbtMap.builder()
