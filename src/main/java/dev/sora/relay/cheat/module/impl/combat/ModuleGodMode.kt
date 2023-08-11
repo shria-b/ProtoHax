@@ -2,50 +2,46 @@ package dev.sora.relay.cheat.module.impl.combat
 
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
+import dev.sora.relay.cheat.value.Choice
 import dev.sora.relay.game.event.EventPacketOutbound
+import dev.sora.relay.game.event.EventTick
 import org.cloudburstmc.math.vector.Vector3f
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket
+import kotlin.math.cos
+import kotlin.math.sin
 
 class ModuleGodMode : CheatModule("GodMode", CheatCategory.COMBAT) {
+	private var modeValue by listValue("Mode", arrayOf(Packet(), Packet2()), Packet())
 	private var highValue by intValue("High", 5, -20..20)
-	private var attackCheckValue by boolValue("AttackCheck", false)
-	private val onPacketOutbound = handle<EventPacketOutbound> {
-		val attackPacket = this.packet
-		if (attackCheckValue) {
-			if (!(attackPacket is InventoryTransactionPacket && attackPacket.transactionType == InventoryTransactionType.ITEM_USE_ON_ENTITY)) {
-				if (packet is MovePlayerPacket) {
-					godModeForMove(packet)
-				}
-				if (packet is PlayerAuthInputPacket) {
-					godModeForAuth(packet)
-				}
-			}
-		} else {
-			if (packet is MovePlayerPacket) {
-				godModeForMove(packet)
-			}
-			if (packet is PlayerAuthInputPacket) {
-				godModeForAuth(packet)
-			}
+	private var authValue by boolValue("AuthPacket", false).visible { modeValue == Packet2() }
+
+	private inner class Packet : Choice("Packet"){
+		private val onTick = handle<EventTick> {
+			session.sendPacket(MovePlayerPacket().apply {
+				runtimeEntityId = session.player.runtimeEntityId
+				position = session.player.vec3Position.add(0f, highValue.toFloat(), 0f)
+				rotation = session.player.vec3Rotation
+				mode = MovePlayerPacket.Mode.NORMAL
+				isOnGround = session.player.onGround
+				tick = session.player.tickExists
+			})
 		}
 	}
 
-	private fun godModeForMove(packet: MovePlayerPacket) {
-		packet.position = Vector3f.from(
-			packet.position.x.toDouble(),
-			packet.position.y + highValue.toDouble(),
-			packet.position.z.toDouble()
-		)
-	}
-
-	private fun godModeForAuth(packet: PlayerAuthInputPacket) {
-		packet.position = Vector3f.from(
-			packet.position.x.toDouble(),
-			packet.position.y + highValue.toDouble(),
-			packet.position.z.toDouble()
-		)
+	private inner class Packet2 : Choice("Packet2"){
+		private val onPacketOutbound = handle<EventPacketOutbound> {
+			if(packet is MovePlayerPacket){
+				packet.position = packet.position.add(0f, highValue.toFloat(), 0f)
+			}
+			if(authValue){
+				if(packet is PlayerAuthInputPacket){
+					packet.position = packet.position.add(0f, highValue.toFloat(), 0f)
+				}
+			}
+		}
 	}
 }
