@@ -22,7 +22,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 
 	private var modeValue by choiceValue(
 		"Mode",
-		arrayOf(Vanilla("Vanilla"), Mineplex(), Jetpack(), Glide(), YPort(), Motion(), Teleport()),
+		arrayOf(Vanilla("Vanilla"), Mineplex(), Jetpack(), Glide(), YPort(), Motion(), Teleport(), Jump()),
 		"Vanilla"
 	)
 	private var verticalSpeedValue by floatValue("Vertical Speed", 1.5f, 0.1f..5f)
@@ -209,8 +209,8 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 				motionY = -verticalSpeedValue
 			}
 			if (player.isHorizontallyMove()) {
-					motionX	= ((-sin(yaw) * horizontalSpeedValue).toFloat())
-					motionZ =((cos(yaw) * horizontalSpeedValue).toFloat())
+				motionX	= ((-sin(yaw) * horizontalSpeedValue).toFloat())
+				motionZ =((cos(yaw) * horizontalSpeedValue).toFloat())
 			}
 
 			session.netSession.inboundPacket(SetEntityMotionPacket().apply {
@@ -233,6 +233,19 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 				session.player.teleport((session.player.posX - sin(yaw) * horizontalSpeedValue).toFloat(),launchY,(session.player.posZ + cos(yaw) * horizontalSpeedValue).toFloat())
 			}else{
 				session.player.teleport(session.player.posX,launchY,session.player.posZ)
+			}
+		}
+	}
+
+	private inner class Jump : Choice("Jump"){
+		private var jumpHighValue by floatValue("Jump High", 0.42f, 0f..5f)
+		private val handleTick = handle<EventTick> {
+			val player = session.player
+			if(player.posY < launchY){
+				session.sendPacketToClient(SetEntityMotionPacket().apply {
+					runtimeEntityId = session.player.runtimeEntityId
+					motion = Vector3f.from(player.motionX, jumpHighValue, player.motionZ)
+				})
 			}
 		}
 	}
