@@ -5,19 +5,13 @@ import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.value.Choice
 import dev.sora.relay.game.event.EventPacketOutbound
 import dev.sora.relay.game.event.EventTick
-import org.cloudburstmc.math.vector.Vector3f
-import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData
-import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType
-import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket
-import kotlin.math.cos
-import kotlin.math.sin
+
 
 class ModuleGodMode : CheatModule("GodMode", CheatCategory.COMBAT) {
-	private var modeValue by listValue("Mode", arrayOf(Packet(), Packet2()), Packet())
+	private var modeValue by choiceValue("Mode", arrayOf(Packet(), Packet2()), "Packet")
 	private var highValue by intValue("High", 5, -20..20)
-	private var authValue by boolValue("AuthPacket", false).visible { modeValue == Packet2() }
 
 	private inner class Packet : Choice("Packet"){
 		private val onTick = handle<EventTick> {
@@ -33,6 +27,7 @@ class ModuleGodMode : CheatModule("GodMode", CheatCategory.COMBAT) {
 	}
 
 	private inner class Packet2 : Choice("Packet2"){
+		private var authValue by boolValue("AuthPacket", false)
 		private val onPacketOutbound = handle<EventPacketOutbound> {
 			if(packet is MovePlayerPacket){
 				packet.position = packet.position.add(0f, highValue.toFloat(), 0f)
