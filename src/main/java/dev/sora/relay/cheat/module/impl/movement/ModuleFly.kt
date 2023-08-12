@@ -239,13 +239,28 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 
 	private inner class Jump : Choice("Jump"){
 		private var jumpHighValue by floatValue("Jump High", 0.42f, 0f..5f)
+		private var boostValue by boolValue("Motion Boost", false)
 		private val handleTick = handle<EventTick> {
 			val player = session.player
+			val yaw = player.direction
+			var motionX = 0f
+			var motionZ = 0f
+			if (player.isHorizontallyMove()) {
+				motionX	= ((-sin(yaw) * horizontalSpeedValue).toFloat())
+				motionZ =((cos(yaw) * horizontalSpeedValue).toFloat())
+			}
 			if(player.posY < launchY){
-				session.sendPacketToClient(SetEntityMotionPacket().apply {
-					runtimeEntityId = session.player.runtimeEntityId
-					motion = Vector3f.from(player.motionX, jumpHighValue, player.motionZ)
-				})
+				if(boostValue){
+					session.sendPacketToClient(SetEntityMotionPacket().apply {
+						runtimeEntityId = session.player.runtimeEntityId
+						motion = Vector3f.from(motionX, jumpHighValue, motionZ)
+					})
+				}else {
+					session.sendPacketToClient(SetEntityMotionPacket().apply {
+						runtimeEntityId = session.player.runtimeEntityId
+						motion = Vector3f.from(player.motionX, jumpHighValue, player.motionZ)
+					})
+				}
 			}
 		}
 	}
