@@ -14,8 +14,8 @@ class ModuleCriticals:CheatModule("Criticals",CheatCategory.COMBAT) {
 	private var modeValue by listValue("Mode", Mode.values(), Mode.VANILLA)
 
 	private enum class Mode(override val choiceName: String) : NamedChoice {
-		MOVEPACKET("MovePacket"),
 		VANILLA("Vanilla"),
+		MOVEPACKET("MovePacket"),
 		JUMP("Jump"),
 		TPJUMP("TPJump")
 	}
@@ -25,6 +25,12 @@ class ModuleCriticals:CheatModule("Criticals",CheatCategory.COMBAT) {
 		val player = session.player
 		if (packet is InventoryTransactionPacket && packet.transactionType == InventoryTransactionType.ITEM_USE_ON_ENTITY) {
 			when (modeValue) {
+				Mode.VANILLA -> {
+					val packetVanilla = this.packet
+					if (packetVanilla is MovePlayerPacket) {
+						packetVanilla.isOnGround = false
+					}
+				}
 				Mode.MOVEPACKET -> {
 					session.sendPacket(MovePlayerPacket().apply {
 						runtimeEntityId = player.runtimeEntityId
@@ -32,13 +38,6 @@ class ModuleCriticals:CheatModule("Criticals",CheatCategory.COMBAT) {
 						rotation = player.vec3Rotation
 						isOnGround = false
 					})
-				}
-
-				Mode.VANILLA -> {
-					val packetVanilla = this.packet
-					if (packetVanilla is MovePlayerPacket) {
-						packetVanilla.isOnGround = false
-					}
 				}
 				Mode.JUMP -> {
 					if(player.onGround) {
