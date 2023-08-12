@@ -3,6 +3,7 @@ package dev.sora.relay.cheat.module.impl.movement
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.value.Choice
+import dev.sora.relay.game.GameSession
 import dev.sora.relay.game.entity.data.Effect
 import dev.sora.relay.game.event.EventPacketInbound
 import dev.sora.relay.game.event.EventPacketOutbound
@@ -13,6 +14,7 @@ import org.cloudburstmc.protocol.bedrock.data.AbilityLayer
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData
 import org.cloudburstmc.protocol.bedrock.data.PlayerPermission
 import org.cloudburstmc.protocol.bedrock.data.command.CommandPermission
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityEventType
 import org.cloudburstmc.protocol.bedrock.packet.*
 import kotlin.math.PI
 import kotlin.math.cos
@@ -45,11 +47,19 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 		})
 	}
 
+	fun hurt(session: GameSession){
+		session.sendPacketToClient(EntityEventPacket().apply {
+			runtimeEntityId = session.player.runtimeEntityId
+			type = EntityEventType.HURT
+		})
+	}
+
 	override fun onEnable() {
 		launchY = session.player.posY
 	}
 
 	private open inner class Vanilla(choiceName: String) : Choice(choiceName) {
+		private var hurtValue by boolValue("Hurt", true)
 
 		override fun onEnable() {
 			if (session.netSessionInitialized) {
@@ -58,6 +68,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 					uniqueEntityId = session.player.uniqueEntityId
 				})
 			}
+			if(hurtValue)hurt(session)
 		}
 
 		private val handlePacketInbound = handle<EventPacketInbound> {
@@ -240,6 +251,8 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 	private inner class Jump : Choice("Jump"){
 		private var jumpHighValue by floatValue("Jump High", 0.42f, 0f..5f)
 		private var boostValue by boolValue("Motion Boost", false)
+		private var hurtValue by boolValue("Hurt", true)
+
 		private val handleTick = handle<EventTick> {
 			val player = session.player
 			val yaw = player.direction
@@ -251,11 +264,13 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 			}
 			if(player.posY < launchY){
 				if(boostValue){
+					if(hurtValue) hurt(session)
 					session.sendPacketToClient(SetEntityMotionPacket().apply {
 						runtimeEntityId = session.player.runtimeEntityId
 						motion = Vector3f.from(motionX, jumpHighValue, motionZ)
 					})
 				}else {
+					if(hurtValue)hurt(session)
 					session.sendPacketToClient(SetEntityMotionPacket().apply {
 						runtimeEntityId = session.player.runtimeEntityId
 						motion = Vector3f.from(player.motionX, jumpHighValue, player.motionZ)
