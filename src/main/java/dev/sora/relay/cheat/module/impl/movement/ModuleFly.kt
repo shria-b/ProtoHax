@@ -41,13 +41,26 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 		abilityLayers.add(AbilityLayer().apply {
 			layerType = AbilityLayer.Type.BASE
 			abilitiesSet.addAll(Ability.values())
-			abilityValues.addAll(arrayOf(Ability.BUILD, Ability.MINE, Ability.DOORS_AND_SWITCHES, Ability.OPEN_CONTAINERS, Ability.ATTACK_PLAYERS, Ability.ATTACK_MOBS, Ability.OPERATOR_COMMANDS, Ability.MAY_FLY, Ability.FLY_SPEED, Ability.WALK_SPEED))
+			abilityValues.addAll(
+				arrayOf(
+					Ability.BUILD,
+					Ability.MINE,
+					Ability.DOORS_AND_SWITCHES,
+					Ability.OPEN_CONTAINERS,
+					Ability.ATTACK_PLAYERS,
+					Ability.ATTACK_MOBS,
+					Ability.OPERATOR_COMMANDS,
+					Ability.MAY_FLY,
+					Ability.FLY_SPEED,
+					Ability.WALK_SPEED
+				)
+			)
 			walkSpeed = 0.1f
 			flySpeed = 0.15f
 		})
 	}
 
-	fun hurt(session: GameSession){
+	fun hurt(session: GameSession) {
 		session.sendPacketToClient(EntityEventPacket().apply {
 			runtimeEntityId = session.player.runtimeEntityId
 			type = EntityEventType.HURT
@@ -68,7 +81,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 					uniqueEntityId = session.player.uniqueEntityId
 				})
 			}
-			if(hurtValue)hurt(session)
+			if (hurtValue) hurt(session)
 		}
 
 		private val handlePacketInbound = handle<EventPacketInbound> {
@@ -197,7 +210,11 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 				session.netSession.inboundPacket(SetEntityMotionPacket().apply {
 					runtimeEntityId = session.player.runtimeEntityId
 					motion =
-						Vector3f.from(-sin(angle) * horizontalSpeedValue, if (flag) 0.42f else -0.42f, cos(angle) * horizontalSpeedValue)
+						Vector3f.from(
+							-sin(angle) * horizontalSpeedValue,
+							if (flag) 0.42f else -0.42f,
+							cos(angle) * horizontalSpeedValue
+						)
 				})
 				flag = !flag
 			}
@@ -220,8 +237,8 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 				motionY = -verticalSpeedValue
 			}
 			if (player.isHorizontallyMove()) {
-				motionX	= ((-sin(yaw) * horizontalSpeedValue).toFloat())
-				motionZ =((cos(yaw) * horizontalSpeedValue).toFloat())
+				motionX = ((-sin(yaw) * horizontalSpeedValue).toFloat())
+				motionZ = ((cos(yaw) * horizontalSpeedValue).toFloat())
 			}
 
 			session.netSession.inboundPacket(SetEntityMotionPacket().apply {
@@ -231,7 +248,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 		}
 	}
 
-	private inner class Teleport : Choice("Teleport"){
+	private inner class Teleport : Choice("Teleport") {
 		private val handleTick = handle<EventTick> {
 			val session = this.session
 			val yaw = session.player.direction
@@ -240,18 +257,22 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 			} else if (session.player.inputData.contains(PlayerAuthInputData.WANT_DOWN)) {
 				launchY -= verticalSpeedValue
 			}
-			if(session.player.isHorizontallyMove()) {
-				session.player.teleport((session.player.posX - sin(yaw) * horizontalSpeedValue).toFloat(),launchY,(session.player.posZ + cos(yaw) * horizontalSpeedValue).toFloat())
-			}else{
-				session.player.teleport(session.player.posX,launchY,session.player.posZ)
+			if (session.player.isHorizontallyMove()) {
+				session.player.teleport(
+					(session.player.posX - sin(yaw) * horizontalSpeedValue).toFloat(),
+					launchY,
+					(session.player.posZ + cos(yaw) * horizontalSpeedValue).toFloat()
+				)
+			} else {
+				session.player.teleport(session.player.posX, launchY, session.player.posZ)
 			}
 		}
 	}
 
-	private inner class Jump : Choice("Jump"){
+	private inner class Jump : Choice("Jump") {
 		private var jumpHighValue by floatValue("Jump High", 0.42f, 0f..5f)
 		private var boostValue by boolValue("Motion Boost", false)
-		private var hurtValue by boolValue("Hurt", true)
+		private var hurtValue by boolValue("Hurt", false)
 
 		private val handleTick = handle<EventTick> {
 			val player = session.player
@@ -259,22 +280,26 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 			var motionX = 0f
 			var motionZ = 0f
 			if (player.isHorizontallyMove()) {
-				motionX	= ((-sin(yaw) * horizontalSpeedValue).toFloat())
-				motionZ =((cos(yaw) * horizontalSpeedValue).toFloat())
+				motionX =
+					if (boostValue) {
+						((-sin(yaw) * horizontalSpeedValue).toFloat())
+					} else {
+						player.motionX
+					}
+				motionZ =
+					if (boostValue) {
+						((cos(yaw) * horizontalSpeedValue).toFloat())
+					} else {
+						player.motionZ
+					}
 			}
-			if(player.posY < launchY){
-				if(boostValue){
-					if(hurtValue) hurt(session)
-					session.sendPacketToClient(SetEntityMotionPacket().apply {
-						runtimeEntityId = session.player.runtimeEntityId
-						motion = Vector3f.from(motionX, jumpHighValue, motionZ)
-					})
-				}else {
-					if(hurtValue)hurt(session)
-					session.sendPacketToClient(SetEntityMotionPacket().apply {
-						runtimeEntityId = session.player.runtimeEntityId
-						motion = Vector3f.from(player.motionX, jumpHighValue, player.motionZ)
-					})
+			if (player.posY < launchY) {
+				session.sendPacketToClient(SetEntityMotionPacket().apply {
+					runtimeEntityId = session.player.runtimeEntityId
+					motion = Vector3f.from(motionX, jumpHighValue, motionZ)
+				})
+				if (hurtValue) {
+					hurt(session)
 				}
 			}
 		}
