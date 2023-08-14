@@ -72,7 +72,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 	}
 
 	private open inner class Vanilla(choiceName: String) : Choice(choiceName) {
-		private var hurtValue by boolValue("Hurt", true)
+		private var hurtValue by boolValue("Hurt", false)
 
 		override fun onEnable() {
 			if (session.netSessionInitialized) {
