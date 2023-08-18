@@ -10,8 +10,10 @@ import dev.sora.relay.game.entity.EntityOther
 import dev.sora.relay.game.entity.EntityPlayer
 import dev.sora.relay.game.event.*
 import dev.sora.relay.utils.timing.MillisecondTimer
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket
+import java.util.concurrent.LinkedBlockingQueue
 
 class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = false) {
 
@@ -20,9 +22,10 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 	private var targetNeutralEntitiesValue by boolValue("TargetNeutralEntities", false)
 	private var antiBotModeValue by listValue("AntiBotMode", AntiBotMode.values(), AntiBotMode.NONE)
 	private var teamCheckModeValue by listValue("TeamCheckMode", TeamCheckMode.values(), TeamCheckMode.NONE)
+	private val rangeValue by floatValue("Range", 150f, 20f..300f).visible { teamCheckModeValue == TeamCheckMode.ROUND }
 
 	private var attackTimer = MillisecondTimer()
-	var previousAttack: Entity? = null
+	private var previousAttack: Entity? = null
 		get() {
 			if (attackTimer.hasTimePassed(3000)) {
 				field = null
@@ -62,6 +65,9 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 		}
 	}
 
+	private var nameList: LinkedBlockingQueue<Entity>? = null
+	private var list:List<Entity>?= null
+	private var selfName = ""
 	fun EntityPlayer.isTeammate(): Boolean {
 		if (this is EntityLocalPlayer) return false
 
@@ -78,7 +84,40 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 
 				return thePlayerNameTag.subSequence(0, 2) == targetNameTag.subSequence(0, 2)
 			}
+			TeamCheckMode.NAME -> {
+				if(nameList.isNullOrEmpty()) return false
+				return nameList!!.filterIsInstance<EntityPlayer>().any { it.username.equals(this.username, true) }
+			}
+			TeamCheckMode.ROUND -> {
+				if(list.isNullOrEmpty()) return false
+				return list!!.filterIsInstance<EntityPlayer>().any { it.username.equals(this.username, true) }
+			}
 			TeamCheckMode.NONE -> false
+		}
+	}
+
+	override fun onEnable() {
+		super.onEnable()
+		if(!nameList.isNullOrEmpty()) nameList!!.clear()
+		selfName = if (session.player.metadata[EntityDataTypes.NAME].toString().contains("\n")) session.player.metadata[EntityDataTypes.NAME].toString().replace("\n", " ") else session.player.metadata[EntityDataTypes.NAME].toString()
+		session.chat("Your Name: $selfName")
+		if(teamCheckModeValue == TeamCheckMode.NAME){
+			nameList = LinkedBlockingQueue<Entity>()
+			nameList!!.clear()
+			for (entity in session.level.entityMap.values.filter { it is EntityPlayer && !it.isBot() }) {
+				val a = entity as EntityPlayer
+				if(session.player.username.contains(a.username.substring(0,4))) {
+					session.chat("Added to teams " + a.username)
+					nameList!!.add(entity)
+				}
+			}
+		}
+		if(teamCheckModeValue == TeamCheckMode.ROUND){
+			list=session.level.entityMap.values.filter { it is EntityPlayer && it.distanceSq(session.player) < rangeValue && !it.isBot() }
+			for (entity in list!!) {
+				val a = entity as EntityPlayer
+				session.chat("Added to teams "+a.username)
+			}
 		}
 	}
 
@@ -121,6 +160,8 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 
 	private enum class TeamCheckMode(override val choiceName: String) : NamedChoice {
 		NAME_TAG("NameTag"),
+		NAME("Name"),
+		ROUND("Round"),
 		NONE("None")
 	}
 }
