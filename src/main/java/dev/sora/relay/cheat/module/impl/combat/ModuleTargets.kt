@@ -25,7 +25,7 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 	private val rangeValue by floatValue("Range", 150f, 20f..300f).visible { teamCheckModeValue == TeamCheckMode.ROUND }
 
 	private var attackTimer = MillisecondTimer()
-	private var previousAttack: Entity? = null
+	var previousAttack: Entity? = null
 		get() {
 			if (attackTimer.hasTimePassed(3000)) {
 				field = null
