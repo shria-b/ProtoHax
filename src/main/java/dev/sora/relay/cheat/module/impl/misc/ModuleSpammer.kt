@@ -33,7 +33,7 @@ class ModuleSpammer : CheatModule("Spammer", CheatCategory.MISC) {
 
 	private inner class Spam : Choice("Spam") {
 
-		private var delayValue by intValue("Delay", 5000, 500..10000)
+		private var delayValue by intValue("Delay", 5000, 0..10000)
 
 		private val spamTimer = MillisecondTimer()
 
