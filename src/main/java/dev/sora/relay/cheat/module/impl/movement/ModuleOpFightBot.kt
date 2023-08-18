@@ -11,12 +11,13 @@ import kotlin.math.sin
 
 class ModuleOpFightBot : CheatModule("OPFightBot", CheatCategory.MOVEMENT) {
 
-    private var modeValue by listValue("Mode", Mode.values(), Mode.STRAFE)
-    private var rangeValue by floatValue("Range", 1.5f, 1.5f..4f)
+	private var modeValue by listValue("Mode", Mode.values(), Mode.STRAFE)
+	private var rangeValue by floatValue("Range", 1.5f, 1.5f..4f)
+	private var yOffsetValue by floatValue("Y Offset", 0.5f, -5f..5f)
 	private var passiveValue by boolValue("Passive", false)
-    private var horizontalSpeedValue by floatValue("HorizontalSpeed", 5f, 1f..7f)
-    private var verticalSpeedValue by floatValue("VerticalSpeed", 4f, 1f..7f)
-    private var strafeSpeedValue by intValue("StrafeSpeed", 20, 10..90).visible { modeValue == Mode.STRAFE }
+	private var horizontalSpeedValue by floatValue("HorizontalSpeed", 5f, 1f..7f)
+	private var verticalSpeedValue by floatValue("VerticalSpeed", 4f, 1f..7f)
+	private var strafeSpeedValue by intValue("StrafeSpeed", 20, 10..90).visible { modeValue == Mode.STRAFE }
 
 	private val handleTick = handle<EventTick> {
 		val moduleTargets = moduleManager.getModule(ModuleTargets::class.java)
@@ -28,7 +29,7 @@ class ModuleOpFightBot : CheatModule("OPFightBot", CheatCategory.MOVEMENT) {
 				Mode.STRAFE -> ((session.player.tickExists * strafeSpeedValue) % 360).toDouble()
 				Mode.BEHIND -> target.rotationYaw + 180.0
 			}).toFloat()
-			session.player.teleport(target.posX - sin(direction) * rangeValue, target.posY + 0.5f, target.posZ + cos(direction) * rangeValue)
+			session.player.teleport(target.posX - sin(direction) * rangeValue, target.posY + yOffsetValue, target.posZ + cos(direction) * rangeValue)
 		} else if (!passiveValue) {
 			val direction = atan2(target.posZ - session.player.posZ, target.posX - session.player.posX) - Math.toRadians(90.0).toFloat()
 			session.player.teleport(session.player.posX - sin(direction) * horizontalSpeedValue,
@@ -38,8 +39,8 @@ class ModuleOpFightBot : CheatModule("OPFightBot", CheatCategory.MOVEMENT) {
 	}
 
 	private enum class Mode(override val choiceName: String) : NamedChoice {
-        RANDOM("Random"),
-        STRAFE("Strafe"),
-        BEHIND("Behind")
-    }
+		RANDOM("Random"),
+		STRAFE("Strafe"),
+		BEHIND("Behind")
+	}
 }
