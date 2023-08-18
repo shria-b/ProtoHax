@@ -15,7 +15,7 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket
 
 class ModuleDisabler : CheatModule("Disabler", CheatCategory.MISC) {
 
-    private var modeValue by choiceValue("Mode", arrayOf(Mineplex, Cubecraft, LifeBoat), Mineplex)
+    private var modeValue by choiceValue("Mode", arrayOf(Mineplex, Cubecraft, LifeBoat, TheHive, CPSCancel), Mineplex)
 
 	private object TheHive : Choice("The Hive") {
 		private val handleTick = handle<EventTick> {
