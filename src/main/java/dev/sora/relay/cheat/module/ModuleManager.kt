@@ -27,6 +27,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleHitbox())
 		registerModule(ModuleCriticals())
 		registerModule(ModuleGodMode())
+		registerModule(ModuleComboHit())
 
 		//misc
 		registerModule(ModuleSpammer())
@@ -37,6 +38,9 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleResourcePackSpoof())
 		registerModule(ModuleMiner())
 		registerModule(ModuleInventoryHelper())
+		registerModule(ModuleCrasher())
+		registerModule(ModuleAntiKick())
+		registerModule(ModuleSpawn())
 
 		//movement
 		registerModule(ModuleFly())
