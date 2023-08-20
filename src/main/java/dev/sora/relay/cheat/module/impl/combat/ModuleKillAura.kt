@@ -13,6 +13,7 @@ import dev.sora.relay.game.utils.getRotationDifference
 import dev.sora.relay.game.utils.toRotation
 import dev.sora.relay.utils.timing.MillisecondTimer
 import org.cloudburstmc.math.vector.Vector3f
+import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket
 import kotlin.math.pow
 
 class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {

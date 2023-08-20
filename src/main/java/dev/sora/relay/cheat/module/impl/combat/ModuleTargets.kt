@@ -65,8 +65,7 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 		}
 	}
 
-	private var nameList: LinkedBlockingQueue<Entity>? = null
-	private var list:List<Entity>?= null
+	private var list:MutableList<Entity>?= null
 	private var selfName = ""
 	fun EntityPlayer.isTeammate(): Boolean {
 		if (this is EntityLocalPlayer) return false
@@ -84,10 +83,6 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 
 				return thePlayerNameTag.subSequence(0, 2) == targetNameTag.subSequence(0, 2)
 			}
-			TeamCheckMode.NAME -> {
-				if(nameList.isNullOrEmpty()) return false
-				return nameList!!.filterIsInstance<EntityPlayer>().any { it.username.equals(this.username, true) }
-			}
 			TeamCheckMode.ROUND -> {
 				if(list.isNullOrEmpty()) return false
 				return list!!.filterIsInstance<EntityPlayer>().any { it.username.equals(this.username, true) }
@@ -98,22 +93,11 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 
 	override fun onEnable() {
 		super.onEnable()
-		if(!nameList.isNullOrEmpty()) nameList!!.clear()
+		if(!list?.isEmpty()!!) list!!.clear()
 		selfName = if (session.player.metadata[EntityDataTypes.NAME].toString().contains("\n")) session.player.metadata[EntityDataTypes.NAME].toString().replace("\n", " ") else session.player.metadata[EntityDataTypes.NAME].toString()
 		session.chat("Your Name: $selfName")
-		if(teamCheckModeValue == TeamCheckMode.NAME){
-			nameList = LinkedBlockingQueue<Entity>()
-			nameList!!.clear()
-			for (entity in session.level.entityMap.values.filter { it is EntityPlayer && !it.isBot() }) {
-				val a = entity as EntityPlayer
-				if(session.player.username.contains(a.username.substring(0,4))) {
-					session.chat("Added to teams " + a.username)
-					nameList!!.add(entity)
-				}
-			}
-		}
 		if(teamCheckModeValue == TeamCheckMode.ROUND){
-			list=session.level.entityMap.values.filter { it is EntityPlayer && it.distanceSq(session.player) < rangeValue && !it.isBot() }
+			list = session.level.entityMap.values.filter { it is EntityPlayer && it.distanceSq(session.player) < rangeValue && !it.isBot() }.toMutableList()
 			for (entity in list!!) {
 				val a = entity as EntityPlayer
 				session.chat("Added to teams "+a.username)
@@ -160,7 +144,6 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 
 	private enum class TeamCheckMode(override val choiceName: String) : NamedChoice {
 		NAME_TAG("NameTag"),
-		NAME("Name"),
 		ROUND("Round"),
 		NONE("None")
 	}
