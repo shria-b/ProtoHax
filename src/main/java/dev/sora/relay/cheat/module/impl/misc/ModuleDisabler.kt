@@ -2,20 +2,26 @@ package dev.sora.relay.cheat.module.impl.misc
 
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
+import dev.sora.relay.cheat.module.ModuleManager
+import dev.sora.relay.cheat.module.impl.combat.ModuleTargets
 import dev.sora.relay.cheat.value.Choice
+import dev.sora.relay.game.GameSession
 import dev.sora.relay.game.entity.EntityLocalPlayer
 import dev.sora.relay.game.event.EventPacketOutbound
 import dev.sora.relay.game.event.EventTick
 import org.cloudburstmc.math.vector.Vector2f
+import org.cloudburstmc.protocol.bedrock.data.PlayerActionType
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData
 import org.cloudburstmc.protocol.bedrock.data.SoundEvent
 import org.cloudburstmc.protocol.bedrock.packet.LevelSoundEventPacket
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket
+import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket
 
 class ModuleDisabler : CheatModule("Disabler", CheatCategory.MISC) {
 
-    private var modeValue by choiceValue("Mode", arrayOf(Mineplex, Cubecraft, LifeBoat, TheHive, CPSCancel), Mineplex)
+    private var modeValue by choiceValue("Mode", arrayOf(GroundSpoof, Cubecraft, LifeBoat, TheHive, CPSCancel), GroundSpoof)
 
 	private object TheHive : Choice("The Hive") {
 		private val handleTick = handle<EventTick> {
@@ -33,7 +39,7 @@ class ModuleDisabler : CheatModule("Disabler", CheatCategory.MISC) {
 		}
 	}
 
-	private object Mineplex : Choice("Mineplex") {
+	private object GroundSpoof : Choice("GroundSpoof") {
 
 		private val handleTick = handle<EventTick> {
 			session.sendPacket(MovePlayerPacket().apply {
