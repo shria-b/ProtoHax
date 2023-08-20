@@ -9,10 +9,7 @@ import dev.sora.relay.game.event.EventPacketInbound
 import dev.sora.relay.game.event.EventPacketOutbound
 import dev.sora.relay.game.event.EventTick
 import org.cloudburstmc.math.vector.Vector3f
-import org.cloudburstmc.protocol.bedrock.data.Ability
-import org.cloudburstmc.protocol.bedrock.data.AbilityLayer
-import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData
-import org.cloudburstmc.protocol.bedrock.data.PlayerPermission
+import org.cloudburstmc.protocol.bedrock.data.*
 import org.cloudburstmc.protocol.bedrock.data.command.CommandPermission
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityEventType
 import org.cloudburstmc.protocol.bedrock.packet.*
@@ -30,8 +27,10 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 	private var verticalSpeedValue by floatValue("Vertical Speed", 1.5f, 0.1f..5f)
 	private var horizontalSpeedValue by floatValue("Horizontal Speed", 1.5f, 0.1f..5f)
 	private var pressJumpValue by boolValue("PressJump", true)
+	private var glideSpoofValue by boolValue("Glide Spoof", true)
 
 	private var launchY = 0f
+	private var gliding = false
 	private val canFly: Boolean
 		get() = !pressJumpValue || session.player.inputData.contains(PlayerAuthInputData.JUMP_DOWN)
 
@@ -68,7 +67,45 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 	}
 
 	override fun onEnable() {
+		super.onEnable()
 		launchY = session.player.posY
+		if(glideSpoofValue){
+			session.sendPacket(PlayerActionPacket().apply {
+				action = PlayerActionType.START_GLIDE
+				runtimeEntityId = session.player.runtimeEntityId
+			})
+		}
+		gliding = true
+	}
+
+	override fun onDisable() {
+		super.onDisable()
+		if(glideSpoofValue){
+			session.sendPacket(PlayerActionPacket().apply {
+				action = PlayerActionType.STOP_GLIDE
+				runtimeEntityId = session.player.runtimeEntityId
+			})
+		}
+		gliding = false
+	}
+
+	private val onPacketOutbound = handle<EventPacketOutbound> {
+		if(glideSpoofValue) {
+			if (packet is PlayerActionPacket) {
+				if (packet.action == PlayerActionType.STOP_GLIDE) {
+					cancel()
+				}
+			} else if (packet is PlayerAuthInputPacket) {
+				if (!gliding) {
+					packet.inputData.add(PlayerAuthInputData.NORTH_JUMP)
+					packet.inputData.add(PlayerAuthInputData.JUMP_DOWN)
+					packet.inputData.add(PlayerAuthInputData.JUMPING)
+					packet.inputData.add(PlayerAuthInputData.WANT_UP)
+					packet.inputData.add(PlayerAuthInputData.START_GLIDING)
+					gliding = true
+				}
+			}
+		}
 	}
 
 	private open inner class Vanilla(choiceName: String) : Choice(choiceName) {
