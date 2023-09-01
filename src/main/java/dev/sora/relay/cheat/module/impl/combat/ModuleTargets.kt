@@ -93,14 +93,21 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 
 	override fun onEnable() {
 		super.onEnable()
-		if(!list?.isEmpty()!!) list!!.clear()
-		selfName = if (session.player.metadata[EntityDataTypes.NAME].toString().contains("\n")) session.player.metadata[EntityDataTypes.NAME].toString().replace("\n", " ") else session.player.metadata[EntityDataTypes.NAME].toString()
-		session.chat("Your Name: $selfName")
-		if(teamCheckModeValue == TeamCheckMode.ROUND){
-			list = session.level.entityMap.values.filter { it is EntityPlayer && it.distanceSq(session.player) < rangeValue && !it.isBot() }.toMutableList()
-			for (entity in list!!) {
-				val a = entity as EntityPlayer
-				session.chat("Added to teams "+a.username)
+		if(teamCheckModeValue != TeamCheckMode.NONE) {
+			if (!list?.isEmpty()!!) list!!.clear()
+			selfName = if (session.player.metadata[EntityDataTypes.NAME].toString()
+					.contains("\n")
+			) session.player.metadata[EntityDataTypes.NAME].toString()
+				.replace("\n", " ") else session.player.metadata[EntityDataTypes.NAME].toString()
+			session.chat("Your Name: $selfName")
+			if (teamCheckModeValue == TeamCheckMode.ROUND) {
+				list =
+					session.level.entityMap.values.filter { it is EntityPlayer && it.distanceSq(session.player) < rangeValue && !it.isBot() }
+						.toMutableList()
+				for (entity in list!!) {
+					val a = entity as EntityPlayer
+					session.chat("Added to teams " + a.username)
+				}
 			}
 		}
 	}
