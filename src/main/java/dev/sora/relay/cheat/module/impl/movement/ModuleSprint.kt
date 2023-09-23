@@ -3,7 +3,7 @@ package dev.sora.relay.cheat.module.impl.movement
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.value.Choice
-import dev.sora.relay.game.event.EventPacketOutbound
+import dev.sora.relay.game.event.EventPacketInbound
 import dev.sora.relay.game.event.EventTick
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType
 import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket
@@ -15,7 +15,7 @@ class ModuleSprint: CheatModule("Sprint", CheatCategory.MOVEMENT) {
 		private val onTick = handle<EventTick> {
 			if(session.player.inGame) {
 				if (!session.player.isSprinting) {
-					session.netSession.outboundPacket(PlayerActionPacket().apply {
+					session.netSession.inboundPacket(PlayerActionPacket().apply {
 						runtimeEntityId = session.player.runtimeEntityId
 						action = PlayerActionType.START_SPRINT
 					})
@@ -25,7 +25,7 @@ class ModuleSprint: CheatModule("Sprint", CheatCategory.MOVEMENT) {
 	}
 
 	private inner class Packet2 : Choice("KeepSprint") {
-		private val onPacketOutbound = handle<EventPacketOutbound> {
+		private val onPacketInbound = handle<EventPacketInbound> {
 			if(packet is PlayerActionPacket){
 				if(packet.action == PlayerActionType.STOP_SPRINT){
 					cancel()

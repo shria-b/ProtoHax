@@ -8,6 +8,7 @@ import org.cloudburstmc.protocol.bedrock.packet.CommandRequestPacket
 
 class ModuleFastCommand: CheatModule("FastCommand", CheatCategory.MISC) {
 	private var commandValue by stringValue("Command", "/")
+	
 	override fun onEnable() {
 		super.onEnable()
 		if (session.player.inGame) {
@@ -17,5 +18,6 @@ class ModuleFastCommand: CheatModule("FastCommand", CheatCategory.MISC) {
 				isInternal = false
 			})
 		}
+		toggle()
 	}
 }
