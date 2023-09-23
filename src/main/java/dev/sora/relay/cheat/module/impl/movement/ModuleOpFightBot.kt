@@ -15,7 +15,7 @@ class ModuleOpFightBot : CheatModule("OPFightBot", CheatCategory.MOVEMENT) {
 
 	private var modeValue by listValue("Mode", Mode.values(), Mode.STRAFE)
 	private var rangeValue by floatValue("Range", 1.5f, 1.5f..4f)
-	private var yOffsetValue by floatValue("Y Offset", 0.5f, -5f..5f)
+	private var yOffsetValue by floatValue("Y Offset", 0f, -5f..5f)
 	private var passiveValue by boolValue("Passive", false)
 	private var horizontalSpeedValue by floatValue("HorizontalSpeed", 5f, 1f..7f)
 	private var verticalSpeedValue by floatValue("VerticalSpeed", 4f, 1f..7f)

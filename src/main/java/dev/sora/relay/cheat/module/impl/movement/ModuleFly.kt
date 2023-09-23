@@ -27,7 +27,7 @@ class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
 	private var verticalSpeedValue by floatValue("Vertical Speed", 1.5f, 0.1f..5f)
 	private var horizontalSpeedValue by floatValue("Horizontal Speed", 1.5f, 0.1f..5f)
 	private var pressJumpValue by boolValue("PressJump", true)
-	private var glideSpoofValue by boolValue("Glide Spoof", true)
+	private var glideSpoofValue by boolValue("GlideSpoof", true)
 
 	private var launchY = 0f
 	private var gliding = false

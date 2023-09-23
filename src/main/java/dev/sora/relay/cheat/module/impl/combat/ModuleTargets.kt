@@ -22,7 +22,7 @@ class ModuleTargets : CheatModule("Targets", CheatCategory.COMBAT, canToggle = f
 	private var targetNeutralEntitiesValue by boolValue("TargetNeutralEntities", false)
 	private var antiBotModeValue by listValue("AntiBotMode", AntiBotMode.values(), AntiBotMode.NONE)
 	private var teamCheckModeValue by listValue("TeamCheckMode", TeamCheckMode.values(), TeamCheckMode.NONE)
-	private val rangeValue by floatValue("Range", 150f, 20f..300f).visible { teamCheckModeValue == TeamCheckMode.ROUND }
+	private val rangeValue by floatValue("Round Range", 150f, 20f..300f).visible { teamCheckModeValue == TeamCheckMode.ROUND }
 
 	private var attackTimer = MillisecondTimer()
 	var previousAttack: Entity? = null

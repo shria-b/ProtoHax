@@ -13,6 +13,7 @@ import dev.sora.relay.game.utils.getRotationDifference
 import dev.sora.relay.game.utils.toRotation
 import dev.sora.relay.utils.timing.MillisecondTimer
 import org.cloudburstmc.math.vector.Vector3f
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket
 import kotlin.math.pow
 
@@ -41,33 +42,40 @@ class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 		val playerRotation = Rotation(session.player.rotationYaw, session.player.rotationPitch)
 		val entityList = session.level.entityMap.values.filter {
 			it.distanceSq(session.player) < range && with(moduleTargets) { it.isTarget() } &&
-					(fovValue == 180 || getRotationDifference(
-						playerRotation,
-						toRotation(session.player.vec3Position, it.vec3Position)
-					) <= fovValue)
+				(fovValue == 180 || getRotationDifference(
+					playerRotation,
+					toRotation(session.player.vec3Position, it.vec3Position)
+				) <= fovValue)
 		}
 		if (entityList.isEmpty()) return@handle
 
 		val aimTarget = selectEntity(session, entityList)
-		if(switchTarget >= entityList.size){
+		if (switchTarget >= entityList.size) {
 			switchTarget = 0
 		}
 		if (cpsValue.range.first >= 20 || cpsValue.canClick) {
 			if (Math.random() <= failRateValue) {
 				session.player.swing(swingValue, failSoundValue)
 			} else {
-				when(attackModeValue) {
+				when (attackModeValue) {
 					AttackMode.MULTI -> {
 						entityList.forEach {
 							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
 						}
 					}
+
 					AttackMode.SINGLE -> {
 						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
 					}
+
 					AttackMode.SWITCH -> {
-						session.player.attackEntity(entityList[switchTarget], swingValue, swingSoundValue, mouseoverValue)
-						if(switchTimer.hasTimePassed(switchDelayValue)){
+						session.player.attackEntity(
+							entityList[switchTarget],
+							swingValue,
+							swingSoundValue,
+							mouseoverValue
+						)
+						if (switchTimer.hasTimePassed(switchDelayValue)) {
 							switchTarget++
 							switchTimer.reset()
 						}
@@ -110,6 +118,7 @@ class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 				return toRotation(source, target)
 			}
 		},
+
 		/**
 		 * represents a touch screen liked rotation
 		 */
@@ -123,7 +132,10 @@ class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 				return if (diff < 50) {
 					last
 				} else {
-					Rotation((aimTarget.yaw - last.yaw) / 0.8f + last.yaw, (aimTarget.pitch - last.pitch) / 0.6f + last.pitch)
+					Rotation(
+						(aimTarget.yaw - last.yaw) / 0.8f + last.yaw,
+						(aimTarget.pitch - last.pitch) / 0.6f + last.pitch
+					)
 				}
 			}
 		},

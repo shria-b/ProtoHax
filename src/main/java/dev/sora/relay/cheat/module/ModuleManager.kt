@@ -27,7 +27,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleHitbox())
 		registerModule(ModuleCriticals())
 		registerModule(ModuleGodMode())
-		registerModule(ModuleComboHit())
+		registerModule(ModuleComboOneHit())
 
 		//misc
 		registerModule(ModuleSpammer())
@@ -41,6 +41,8 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleCrasher())
 		registerModule(ModuleAntiKick())
 		registerModule(ModuleSpawn())
+		registerModule(ModuleFastCommand())
+		registerModule(ModuleChat())
 
 		//movement
 		registerModule(ModuleFly())
@@ -53,6 +55,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleSpeed())
 		registerModule(ModuleOpFightBot())
 		registerModule(ModuleClickTP())
+		registerModule(ModuleSprint())
 
 		//visual
 		registerModule(ModuleNoHurtCam())
