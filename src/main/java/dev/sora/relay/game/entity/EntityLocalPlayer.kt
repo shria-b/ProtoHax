@@ -93,6 +93,8 @@ class EntityLocalPlayer(private val session: GameSession, override val eventMana
 	var authMotionX = 0f
 	var authMotionY = 0f
 
+	var inGame = false
+
     override fun rotate(yaw: Float, pitch: Float) {
         this.prevRotationYaw = rotationYaw
         this.prevRotationPitch = rotationPitch
@@ -155,6 +157,7 @@ class EntityLocalPlayer(private val session: GameSession, override val eventMana
 
 	private val handlePacketInbound = handle<EventPacketInbound> {
 		if (packet is StartGamePacket) {
+			inGame = true
 			if (!hasSetEntityId) {
 				runtimeEntityId = packet.runtimeEntityId
 				uniqueEntityId = packet.uniqueEntityId
@@ -197,6 +200,10 @@ class EntityLocalPlayer(private val session: GameSession, override val eventMana
 		} else if (packet is PlayerAuthInputPacket) {
 			session.onTick(true)
 		}
+	}
+
+	private val onDisconnect = handle<EventDisconnect> {
+		inGame = false
 	}
 
 	private val handlePacketOutbound = handle<EventPacketOutbound> {

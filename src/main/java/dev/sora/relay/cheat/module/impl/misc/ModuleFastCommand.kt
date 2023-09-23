@@ -10,10 +10,12 @@ class ModuleFastCommand: CheatModule("FastCommand", CheatCategory.MISC) {
 	private var commandValue by stringValue("Command", "/")
 	override fun onEnable() {
 		super.onEnable()
-		session.sendPacket(CommandRequestPacket().apply {
-			command = commandValue
-			commandOriginData = CommandOriginData(CommandOriginType.PLAYER, session.player.uuid,"",-1)
-			isInternal = false
-		})
+		if (session.player.inGame) {
+			session.sendPacket(CommandRequestPacket().apply {
+				command = commandValue
+				commandOriginData = CommandOriginData(CommandOriginType.PLAYER, session.player.uuid, "", -1)
+				isInternal = false
+			})
+		}
 	}
 }

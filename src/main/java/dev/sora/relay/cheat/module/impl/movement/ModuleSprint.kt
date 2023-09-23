@@ -13,11 +13,13 @@ class ModuleSprint: CheatModule("Sprint", CheatCategory.MOVEMENT) {
 
 	private inner class Packet : Choice("SendPacket") {
 		private val onTick = handle<EventTick> {
-			if(!session.player.isSprinting){
-				session.netSession.outboundPacket(PlayerActionPacket().apply {
-					runtimeEntityId = session.player.runtimeEntityId
-					action = PlayerActionType.START_SPRINT
-				})
+			if(session.player.inGame) {
+				if (!session.player.isSprinting) {
+					session.netSession.outboundPacket(PlayerActionPacket().apply {
+						runtimeEntityId = session.player.runtimeEntityId
+						action = PlayerActionType.START_SPRINT
+					})
+				}
 			}
 		}
 	}
