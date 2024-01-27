@@ -11,7 +11,7 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ModuleFightBot : CheatModule("FightBot", CheatCategory.MOVEMENT) {
+class ModuleFX : CheatModule("FX", CheatCategory.MOVEMENT) {
 
 	private var modeValue by listValue("Mode", Mode.values(), Mode.STRAFE)
 	private var rangeValue by floatValue("Range", 1.5f, -4f..4f)

@@ -17,7 +17,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ModuleFly : CheatModule("Fly", CheatCategory.MOVEMENT) {
+class ModuleFlight : CheatModule("Flight", CheatCategory.MOVEMENT) {
 
 	private var modeValue by choiceValue(
 		"Mode",
