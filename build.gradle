@@ -65,7 +65,7 @@ publishing {
     repositories {
         maven {
             name = 'GitHubPackages'
-            url = uri('https://maven.pkg.github.com/CloudPixel-Studio/ProtoHax')
+            url = uri('https://maven.pkg.github.com/cjqnsh0u/ProtoHax')
 
             credentials {
                 username = System.getenv("USERNAME_GITHUB")
