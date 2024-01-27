@@ -21,6 +21,8 @@ class ModuleManager(private val session: GameSession) {
 		//combat
 		registerModule(ModuleVelocity())
 		registerModule(ModuleKillAura())
+		registerModule(ModuleKillAura2())
+		registerModule(ModuleKillAura3())
 		registerModule(ModuleTargets())
 		registerModule(ModuleSurround())
 		registerModule(ModuleCrystalAura())
@@ -37,7 +39,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleDeviceSpoof())
 		registerModule(ModuleResourcePackSpoof())
 		registerModule(ModuleMiner())
-		registerModule(ModuleInventoryHelper())
+		registerModule(ModuleBbzL())
 		registerModule(ModuleCrasher())
 		registerModule(ModuleAntiKick())
 		registerModule(ModuleSpawn())
@@ -45,7 +47,7 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleChat())
 
 		//movement
-		registerModule(ModuleFly())
+		registerModule(ModuleFlight())
 		registerModule(ModuleNoFall())
 		registerModule(ModuleFastBreak())
 		registerModule(ModuleBlink())
@@ -53,9 +55,10 @@ class ModuleManager(private val session: GameSession) {
 		registerModule(ModuleAirJump())
 		registerModule(ModuleClip())
 		registerModule(ModuleSpeed())
-		registerModule(ModuleOpFightBot())
+		registerModule(ModuleFightBot())
+		registerModule(ModuleFX())
 		registerModule(ModuleClickTP())
-		registerModule(ModuleSprint())
+		registerModule(ModuleSprint()) 
 
 		//visual
 		registerModule(ModuleNoHurtCam())
