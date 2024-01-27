@@ -22,7 +22,7 @@ import org.cloudburstmc.protocol.bedrock.packet.ContainerClosePacket
 import org.cloudburstmc.protocol.bedrock.packet.ContainerOpenPacket
 import org.cloudburstmc.protocol.bedrock.packet.InteractPacket
 
-class ModuleInventoryHelper : CheatModule("InventoryHelper", CheatCategory.MISC) {
+class ModuleBbzL : CheatModule("BbzL", CheatCategory.MISC) {
 
     private var stealChestValue by boolValue("StealChest", true)
     private var guiOpenValue by boolValue("GuiOpen", false)
