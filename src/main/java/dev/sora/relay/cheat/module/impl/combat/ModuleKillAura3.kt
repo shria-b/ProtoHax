@@ -61,10 +61,20 @@ class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
 					AttackMode.MULTI -> {
 						entityList.forEach {
 							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
+							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
+							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
+							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
+							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
+							session.player.attackEntity(it, swingValue, swingSoundValue, mouseoverValue)
 						}
 					}
 
 					AttackMode.SINGLE -> {
+						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
+						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
+						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
+						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
+						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
 						session.player.attackEntity(aimTarget, swingValue, swingSoundValue, mouseoverValue)
 					}
 

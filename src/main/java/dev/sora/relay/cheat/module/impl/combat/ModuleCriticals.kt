@@ -34,7 +34,7 @@ class ModuleCriticals:CheatModule("Criticals",CheatCategory.COMBAT) {
 				Mode.MOVEPACKET -> {
 					session.sendPacket(MovePlayerPacket().apply {
 						runtimeEntityId = player.runtimeEntityId
-						position = player.vec3Position.add(0f, Math.random().toFloat(), 0f)
+						position = player.vec3Position.add(0f, -0.02f, 0f)
 						rotation = player.vec3Rotation
 						isOnGround = false
 					})
@@ -44,7 +44,7 @@ class ModuleCriticals:CheatModule("Criticals",CheatCategory.COMBAT) {
 						session.sendPacketToClient(SetEntityMotionPacket().apply {
 							motion = Vector3f.from(
 								player.motionX.toDouble(),
-								0.42,
+								-0.02,
 								player.motionZ.toDouble()
 							)
 							runtimeEntityId = player.runtimeEntityId
@@ -53,7 +53,7 @@ class ModuleCriticals:CheatModule("Criticals",CheatCategory.COMBAT) {
 				}
 				Mode.TPJUMP -> {
 					if(player.onGround){
-						player.teleport(player.posX, player.posY + 0.42f, player.posZ)
+						player.teleport(player.posX, player.posY + -0.02f, player.posZ)
 					}
 				}
 			}
