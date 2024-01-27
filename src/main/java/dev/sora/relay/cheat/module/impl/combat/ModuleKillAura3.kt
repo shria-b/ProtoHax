@@ -17,7 +17,7 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket
 import kotlin.math.pow
 
-class ModuleKillAura : CheatModule("KillAura", CheatCategory.COMBAT) {
+class ModuleKillAura3 : CheatModule("KillAura3", CheatCategory.COMBAT) {
 
 	private val cpsValue = clickValue()
 	private var rangeValue by floatValue("Range", 3.7f, 2f..12f)
