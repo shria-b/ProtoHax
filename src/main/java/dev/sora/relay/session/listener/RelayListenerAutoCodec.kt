@@ -40,7 +40,7 @@ import org.cloudburstmc.protocol.bedrock.codec.v594.Bedrock_v594
 import org.cloudburstmc.protocol.bedrock.codec.v618.Bedrock_v618
 import org.cloudburstmc.protocol.bedrock.codec.v622.Bedrock_v622
 import org.cloudburstmc.protocol.bedrock.codec.v630.Bedrock_v630
-import org.cloudburstmc.protocol.bedrock.codec.v649.Bedrock_v649
+import org.cloudburstmc.protocol.bedrock.codec.v630.Bedrock_v649
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket
 import org.cloudburstmc.protocol.bedrock.packet.LoginPacket
 import org.cloudburstmc.protocol.bedrock.packet.RequestNetworkSettingsPacket
