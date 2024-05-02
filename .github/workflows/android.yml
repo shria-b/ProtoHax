@@ -34,4 +34,3 @@ jobs:
         files: app/build/outputs/apk/release/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      fail_fast: false
