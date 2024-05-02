@@ -38,12 +38,13 @@ jobs:
         git config --global user.name "shria-b"
         git tag $tag_name -a -m "Release $tag_name"
         git push origin $tag_name
+        echo ::set-output name=TAG_NAME::$tag_name
 
     - name: Publish to GitHub Releases
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ steps.create_tag.outputs.tag_name }}
-        release_name: Release ${{ steps.create_tag.outputs.tag_name }}
+        tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
+        name: Release ${{ steps.create_tag.outputs.TAG_NAME }}
         files: app/build/outputs/apk/release/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
