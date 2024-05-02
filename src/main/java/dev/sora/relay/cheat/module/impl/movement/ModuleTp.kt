@@ -1,7 +1,7 @@
 package dev.Sora.relay.cheat.module.impl.movement;
 
-import dev.Sora.relay.cheat.module.impl.CheatCategory
-import dev.Sora.relay.cheat.module.impl.CheatModule
+import dev.Sora.relay.cheat.module.CheatCategory
+import dev.Sora.relay.cheat.module.CheatModule
 import org.cloudburstmc.math.vector.Vector3d
 
 class ModuleTp: CheatCategory("Tp",CheatCategory,canToggle=false){
