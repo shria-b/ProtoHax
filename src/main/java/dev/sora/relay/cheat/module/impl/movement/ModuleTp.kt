@@ -2,7 +2,7 @@ package dev.Sora.relay.cheat.module.impl.movement
 
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
-import org.cloudburstmc.math.vector.Vector3d
+import org.cloudburstmc.math.vector.Vector3f
 
 class ModuleTp: CheatModule("Tp",CheatCategory.MOVEMENT,canToggle=false){
   private val x by stringValue("x","0")
@@ -12,7 +12,7 @@ class ModuleTp: CheatModule("Tp",CheatCategory.MOVEMENT,canToggle=false){
     if(!session.netSessionInitialized) return
     
     val player = session.player
-    val tpPos = Vector3d.from(
+    val tpPos = Vector3f.from(
       x.toDouble(),
       y.toDouble(),
       z.toDouble()
