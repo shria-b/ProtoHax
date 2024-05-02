@@ -5,9 +5,9 @@ import dev.sora.relay.cheat.module.CheatModule
 import org.cloudburstmc.math.vector.Vector3d
 
 class ModuleTp: CheatModule("Tp",CheatCategory.MOVEMENT,canToggle=false){
-  private val x by stringValue("x")
-  private val y by stringValue("y")
-  private val z by stringValue("z")
+  private val x by stringValue("x","0")
+  private val y by stringValue("y","0")
+  private val z by stringValue("z","0")
   override fun onEnable() {
     if(!session.netSessionInitialized) return
     
