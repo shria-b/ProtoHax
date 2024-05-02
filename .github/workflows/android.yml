@@ -1,20 +1,22 @@
-name: Android CI
+name: Android CI and Release
 
 on:
   push:
-    branches: [ "stable" ]
+    branches:
+      - stable
   pull_request:
-    branches: [ "stable" ]
+    branches:
+      - stable
 
 jobs:
-  build:
-
+  build-and-publish:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 11
-      uses: actions/setup-java@v3
+    - uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
       with:
         java-version: '11'
         distribution: 'temurin'
@@ -22,5 +24,14 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
     - name: Build with Gradle
       run: ./gradlew build
+
+    - name: Publish to GitHub Releases
+      uses: softprops/action-gh-release@v1
+      with:
+        files: app/build/outputs/apk/release/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      fail_fast: false
