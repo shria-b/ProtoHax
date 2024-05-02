@@ -65,7 +65,7 @@ publishing {
     repositories {
         maven {
             name = 'GitHubPackages'
-            url = uri('https://maven.pkg.github.com/cjqnsh0u/ProtoHax')
+            url = uri('https://maven.pkg.github.com/shria-b/ProtoHax')
 
             credentials {
                 username = System.getenv("USERNAME_GITHUB")
