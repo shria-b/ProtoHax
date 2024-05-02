@@ -45,6 +45,6 @@ jobs:
       with:
         tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
         name: Release ${{ steps.create_tag.outputs.TAG_NAME }}
-        files: app/build/outputs/apk/release/*
+        files: build/libs/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
