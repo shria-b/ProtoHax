@@ -28,6 +28,15 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
 
+    - name: Create Release Tag
+      id: create_tag
+      run: |
+        # 创建一个Git标签
+        echo "Create a new tag"
+        tag_name="v$(date +%Y%m%d%H%M%S)"
+        git tag $tag_name -a -m "Release $tag_name"
+        git push origin $tag_name
+
     - name: Publish to GitHub Releases
       uses: softprops/action-gh-release@v1
       with:
