@@ -1,4 +1,4 @@
-package dev.Sora.relay.cheat.module.impl.movement
+package dev.sora.relay.cheat.module.impl.movement
 
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
